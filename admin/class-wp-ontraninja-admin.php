@@ -162,9 +162,9 @@ class Wp_Ontraninja_Admin {
 
 	public function ontraninja_custom_settings() { 
 
-		register_setting('ontraninja-settings-group', 'won_api_app_id', );
+		register_setting('ontraninja-settings-group', 'won_api_app_id');
 
-		register_setting('ontraninja-settings-group', 'won_api_app_key', );
+		register_setting('ontraninja-settings-group', 'won_api_app_key');
 
 		add_settings_section('ontraninja-api-options', "API Settings", array($this,'ontraninja_settings_options'), 'ontraport-management-tool');  
 

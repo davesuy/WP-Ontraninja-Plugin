@@ -25,6 +25,8 @@ class Wp_Ontraninja_Shortcodes {
 	private $client;
 
 
+
+
 	/**
 	 * Initialize the class and set its properties.
 	 *
@@ -36,10 +38,6 @@ class Wp_Ontraninja_Shortcodes {
 
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
-
-		$this->$app_id = $app_id;
-		$this->$app_key = $app_key;
-
 		$this->client = $client;
 
 	}
