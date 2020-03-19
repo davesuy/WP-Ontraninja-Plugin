@@ -61,19 +61,26 @@ class Wp_Ontraninja_Admin {
 	 */
 	public function enqueue_styles() {
 
-		/**
-		 * This function is provided for demonstration purposes only.
-		 *
-		 * An instance of this class should be passed to the run() function
-		 * defined in Wp_Ontraninja_Loader as all of the hooks are defined
-		 * in that particular class.
-		 *
-		 * The Wp_Ontraninja_Loader will then create the relationship
-		 * between the defined hooks and the functions defined in this
-		 * class.
-		 */
+		$valid_pages = array("ontraport-management-tool", "ontraport-create-record");
 
-		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/wp-ontraninja-admin.css', array(), $this->version, 'all' );
+		$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : "";
+
+		if(in_array($page, $valid_pages)) {
+
+			wp_enqueue_style( "won-bootstrap", WP_ONTRANINJA_PLUGIN_URL . 'assets/css/bootstrap.min.css', array(), $this->version, 'all' );
+
+			wp_enqueue_style( "won-bootstrap-theme", WP_ONTRANINJA_PLUGIN_URL . 'assets/css/bootstrap-theme.min.css', array(), $this->version, 'all' );
+
+			wp_enqueue_style( "won-bootstrap-utilities", WP_ONTRANINJA_PLUGIN_URL . 'assets/css/bootstrap-4-utilities.min.css', array(), $this->version, 'all' );
+		
+			wp_enqueue_style( "won-datatable", WP_ONTRANINJA_PLUGIN_URL . 'assets/css/jquery.dataTables.min.css', array(), $this->version, 'all' );
+
+			wp_enqueue_style( "won-sweetalert", WP_ONTRANINJA_PLUGIN_URL . 'assets/css/sweetalert.css', array(), $this->version, 'all' );
+
+
+			wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/wp-ontraninja-admin.css', array(), $this->version, 'all' );
+
+		}
 
 	}
 
@@ -84,19 +91,31 @@ class Wp_Ontraninja_Admin {
 	 */
 	public function enqueue_scripts() {
 
-		/**
-		 * This function is provided for demonstration purposes only.
-		 *
-		 * An instance of this class should be passed to the run() function
-		 * defined in Wp_Ontraninja_Loader as all of the hooks are defined
-		 * in that particular class.
-		 *
-		 * The Wp_Ontraninja_Loader will then create the relationship
-		 * between the defined hooks and the functions defined in this
-		 * class.
-		 */
+		$valid_pages = array("ontraport-management-tool", "ontraport-create-record");
 
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/wp-ontraninja-admin.js', array( 'jquery' ), $this->version, false );
+		$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : "";
+
+		if(in_array($page, $valid_pages)) {
+
+			wp_enqueue_script('jquery');
+
+			wp_enqueue_script( 'won-bootstrap-js', WP_ONTRANINJA_PLUGIN_URL. 'assets/js/bootstrap.min.js', array( 'jquery' ), $this->version, false );
+
+			wp_enqueue_script( 'won-datatable-js', WP_ONTRANINJA_PLUGIN_URL. 'assets/js/jquery.dataTables.min.js', array( 'jquery' ), $this->version, false );
+
+			wp_enqueue_script( 'won-validate-js', WP_ONTRANINJA_PLUGIN_URL. 'assets/js/jquery.validate.min.js', array( 'jquery' ), $this->version, false );
+
+			wp_enqueue_script( 'won-sweetalert-js', WP_ONTRANINJA_PLUGIN_URL. 'assets/js/sweetalert.min.js', array( 'jquery' ), $this->version, false );
+
+			wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/wp-ontraninja-admin.js', array( 'jquery' ), $this->version, false );
+
+			wp_localize_script($this->plugin_name, 'won_data', array(
+				"name" => "Wp Ontraninja",
+				"author" => "ITMOOTI",
+				"ajax" => admin_url("admin-ajax.php")
+			));
+
+		}
 
 	}
 
@@ -104,13 +123,79 @@ class Wp_Ontraninja_Admin {
 
 	public function ontraninja_menu() {
 
-		add_menu_page("Ontraport Management Tool", "Ontraport Management Tool", "manage_options", "ontraport-management-tool", array($this, "ontraport_management_dashboard"), "", 22);
+		add_menu_page("Ontraport Management Tool", "Ontraport Management Tool", "manage_options", "ontraport-management-tool", array($this, "ontraport_management_settings"), "", 22);
+
+		// Create submenus
+
+		add_submenu_page("ontraport-management-tool", "General", "General ", "manage_options", "ontraport-management-tool", array($this, "ontraport_management_settings"));
+
+		add_submenu_page("ontraport-management-tool", "Create Record", "Create Record", "manage_options", "ontraport-create-record", array($this, "ontraport_management_create"));
+
+
+		// Activate custom settings
+		add_action( 'admin_init', array($this,'ontraninja_custom_settings') );
+
 	}
 
-	// Menu callback function
+	// Menu and Submenu callback function
 
-	public function ontraport_management_dashboard() {
-		echo "<h3>Welcome to Menu</h3>";
+	public function ontraport_management_settings() {
+
+		ob_start();
+
+		include_once(WP_ONTRANINJA_PLUGIN_PATH."admin/partials/tmpl-settings.php");
+
+		$template = ob_get_contents();
+
+		ob_end_clean();
+
+		echo $template;
+
+	}
+
+	public function ontraport_management_create() {
+		echo "<h3>Create Record</h3>";
+	}
+
+
+	// Settings Options
+
+	public function ontraninja_custom_settings() { 
+
+		register_setting('ontraninja-settings-group', 'won_api_app_id', );
+
+		register_setting('ontraninja-settings-group', 'won_api_app_key', );
+
+		add_settings_section('ontraninja-api-options', "API Settings", array($this,'ontraninja_settings_options'), 'ontraport-management-tool');  
+
+		add_settings_field('won-app-id', "API App ID", array($this,"ontraninja_settings_id"), "ontraport-management-tool",'ontraninja-api-options');
+
+		add_settings_field('won-app-key', "API App key", array($this,"ontraninja_settings_key"), "ontraport-management-tool",'ontraninja-api-options');
+
+	}
+
+	public function ontraninja_settings_options() {
+
+		echo "Enter your Ontraport Credentials";
+	
+	}
+
+	public function ontraninja_settings_id() {
+
+		$app_id = esc_attr(get_option('won_api_app_id'));
+		
+
+		echo '<input type="text" name="won_api_app_id" class="regular-text" value="'.$app_id.'" />';
+		
+
+	}
+
+	public function ontraninja_settings_key() {
+
+		$app_key = esc_attr(get_option('won_api_app_key'));
+
+		echo '<input type="text" name="won_api_app_key" class="regular-text" value="'.$app_key.'" />';
+
 	}
 
 }

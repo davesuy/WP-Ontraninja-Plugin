@@ -1,5 +1,7 @@
 <?php
 
+use OntraportAPI\Ontraport;
+
 /**
  * The file that defines the core plugin class
  *
@@ -57,6 +59,8 @@ class Wp_Ontraninja {
 	 */
 	protected $version;
 
+	protected $client;
+
 	/**
 	 * Define the core functionality of the plugin.
 	 *
@@ -67,6 +71,7 @@ class Wp_Ontraninja {
 	 * @since    1.0.0
 	 */
 	public function __construct() {
+
 		if ( defined( 'WP_ONTRANINJA_VERSION' ) ) {
 			$this->version = WP_ONTRANINJA_VERSION;
 		} else {
@@ -75,6 +80,9 @@ class Wp_Ontraninja {
 		$this->plugin_name = 'wp-ontraninja';
 
 		$this->load_dependencies();
+
+		$this->client = new Ontraport(WP_ONTRANINJA_APP_ID, WP_ONTRANINJA_APP_KEY);
+
 		$this->set_locale();
 		$this->define_admin_hooks();
 		$this->define_public_hooks();
@@ -98,6 +106,10 @@ class Wp_Ontraninja {
 	 * @access   private
 	 */
 	private function load_dependencies() {
+
+		// Ontraport PHP Library
+
+		require_once plugin_dir_path( dirname( __FILE__ ) ) .'vendor/autoload.php';
 
 		/**
 		 * The class responsible for orchestrating the actions and filters of the
@@ -123,6 +135,14 @@ class Wp_Ontraninja {
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-wp-ontraninja-public.php';
 
 		$this->loader = new Wp_Ontraninja_Loader();
+
+		// Shortcodes 
+
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-wp-ontraninja-shortcodes.php';
+
+	
+
+
 
 	} 
 
@@ -156,7 +176,8 @@ class Wp_Ontraninja {
 
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
-		// action hook for admin menu
+		
+		// Action hook for admin menu
 		$this->loader->add_action( 'admin_menu', $plugin_admin, 'ontraninja_menu' );
 
 	}
@@ -172,10 +193,19 @@ class Wp_Ontraninja {
 
 		$plugin_public = new Wp_Ontraninja_Public( $this->get_plugin_name(), $this->get_version() );
 
+
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
 
+		// Shortcode Init
+		
+		$plugin_shortcode =  new Wp_Ontraninja_Shortcodes( $this->get_plugin_name(), $this->get_version(), $this->get_client());
+
+		$this->loader->add_action( 'init', $plugin_shortcode, 'public_shortcodes' );
+
 	}
+
+
 
 	/**
 	 * Run the loader to execute all of the hooks with WordPress.
@@ -216,5 +246,12 @@ class Wp_Ontraninja {
 	public function get_version() {
 		return $this->version;
 	}
+
+
+	public function get_client() {
+		return $this->client;
+	}
+
+
 
 }

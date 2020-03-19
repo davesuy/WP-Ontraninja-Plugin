@@ -1,0 +1,5 @@
+{
+    "require": {
+        "ontraport/sdk-php": "^1.2"
+    }
+}

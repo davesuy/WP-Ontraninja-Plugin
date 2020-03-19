@@ -15,7 +15,7 @@
  * @wordpress-plugin
  * Plugin Name:       WP Ontraninja
  * Plugin URI:        https://itmooti.com/
- * Description:       This is a short description of what the plugin does. It's displayed in the WordPress admin area.
+ * Description:       
  * Version:           1.0.0
  * Author:            ITMOOTI
  * Author URI:        https://itmooti.com/
@@ -36,6 +36,12 @@ if ( ! defined( 'WPINC' ) ) {
  * Rename this for your plugin and update it as you release new versions.
  */
 define( 'WP_ONTRANINJA_VERSION', '1.0.0' );
+define( 'WP_ONTRANINJA_PLUGIN_URL', plugin_dir_url(__FILE__) );
+define( 'WP_ONTRANINJA_PLUGIN_PATH', plugin_dir_path(__FILE__) );
+
+define( 'WP_ONTRANINJA_APP_ID', get_option('won_api_app_id'));
+define( 'WP_ONTRANINJA_APP_KEY', get_option('won_api_app_key'));
+
 
 /**
  * The code that runs during plugin activation.
