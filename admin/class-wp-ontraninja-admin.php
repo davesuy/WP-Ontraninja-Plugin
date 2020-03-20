@@ -52,6 +52,13 @@ class Wp_Ontraninja_Admin {
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
 
+		$this->admin_load_classes();
+
+	}
+
+	public function admin_load_classes() {
+
+	
 	}
 
 	/**
@@ -183,18 +190,33 @@ class Wp_Ontraninja_Admin {
 	public function ontraninja_settings_id() {
 
 		$app_id = esc_attr(get_option('won_api_app_id'));
-		
 
-		echo '<input type="text" name="won_api_app_id" class="regular-text" value="'.$app_id.'" />';
-		
+		$app_id_output = "";
 
+		if (strlen($app_id) > 6) {
+
+			$app_id_output = substr($app_id, 0, 5) . '******';
+
+		}
+		
+		echo '<input type="text" name="won_api_app_id" class="regular-text" placeholder="'.$app_id_output.'"  />';
+	
+		
 	}
 
 	public function ontraninja_settings_key() {
 
 		$app_key = esc_attr(get_option('won_api_app_key'));
 
-		echo '<input type="text" name="won_api_app_key" class="regular-text" value="'.$app_key.'" />';
+		$app_key_output = "";
+
+		if (strlen($app_key) > 6) {
+
+			$app_key_output = substr($app_key, 0, 5) . '******';
+
+		}
+		echo '<input type="text" name="won_api_app_key" class="regular-text" placeholder="'.$app_key_output.'" />';
+		
 
 	}
 

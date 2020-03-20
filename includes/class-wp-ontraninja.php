@@ -136,14 +136,7 @@ class Wp_Ontraninja {
 
 		$this->loader = new Wp_Ontraninja_Loader();
 
-		// Shortcodes 
-
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-wp-ontraninja-shortcodes.php';
-
 	
-
-
-
 	} 
 
 	/**

@@ -78,13 +78,11 @@ class Wp_Ontraninja_Shortcodes {
 
 				//return '<pre>'.print_r($response, true).'</pre>';
 
-				return '<p><strong>'.$atts['label'].':</strong> '.$response_decode->data->{$atts['field']}.'</p>';
+				$label = $atts['label'].':';
 
-			} else {
+				return '<p><strong>'.$label.'</strong> '.$response_decode->data->{$atts['field']}.'</p>';
 
-	    		return '<p>The Shortcode requires adding a get parameter on the URL like this "?id=x"</p>';
-
-			}
+			} 
 	}
 
 	public function wp_ontraninja_contact_field_func($atts) {
@@ -129,13 +127,11 @@ class Wp_Ontraninja_Shortcodes {
 
 			$field_output = $atts['field'];
 
-			return '<p><strong>'.$atts['label'].':</strong> '.$response_contact_decode->data->$field_output.'</p>';
+			$label = $atts['label'].':';
 
-	    } else {
+			return '<p><strong>'.$label.'</strong> '.$response_contact_decode->data->$field_output.'</p>';
 
-	    	return '<p>The Shortcode requires adding a get parameter on the URL like this "?id=x"</p>';
-
-	    }
+	    } 
 
 	}
 		 

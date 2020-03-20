@@ -52,6 +52,17 @@ class Wp_Ontraninja_Public {
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
 
+		$this->public_load_classes();
+
+	}
+
+
+	public function public_load_classes() {
+
+		// Shortcodes
+
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-wp-ontraninja-shortcodes.php';
+
 	}
 
 	/**
