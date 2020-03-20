@@ -78,7 +78,12 @@ class Wp_Ontraninja_Shortcodes {
 
 				//return '<pre>'.print_r($response, true).'</pre>';
 
-				$label = $atts['label'].':';
+			
+				$label = "";
+				
+				if($atts['label']) {
+					$label = $atts['label'].':';
+				}
 
 				return '<p><strong>'.$label.'</strong> '.$response_decode->data->{$atts['field']}.'</p>';
 
@@ -127,7 +132,11 @@ class Wp_Ontraninja_Shortcodes {
 
 			$field_output = $atts['field'];
 
-			$label = $atts['label'].':';
+			$label = "";
+				
+			if($atts['label']) {
+				$label = $atts['label'].':';
+			}
 
 			return '<p><strong>'.$label.'</strong> '.$response_contact_decode->data->$field_output.'</p>';
 
