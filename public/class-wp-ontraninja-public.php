@@ -86,6 +86,12 @@ class Wp_Ontraninja_Public {
 
 		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/wp-ontraninja-public.css', array(), $this->version, 'all' );
 
+		wp_enqueue_style( "won-bootstrap", WP_ONTRANINJA_PLUGIN_URL . 'assets/css/bootstrap.min.css', array(), $this->version, 'all' );
+
+		wp_enqueue_style( "won-bootstrap-theme", WP_ONTRANINJA_PLUGIN_URL . 'assets/css/bootstrap-theme.min.css', array(), $this->version, 'all' );
+
+		wp_enqueue_style( "won-bootstrap-utilities", WP_ONTRANINJA_PLUGIN_URL . 'assets/css/bootstrap-4-utilities.min.css', array(), $this->version, 'all' );
+
 	}
 
 	/**

@@ -52,24 +52,20 @@ class Wp_Ontraninja_Shortcodes {
 
 	public function wp_ontraninja_cot_field_func($atts) {
 
-			$default_timezone = wp_timezone_string();
-
 			$atts = shortcode_atts( array(
 		        'object_id' => '',
 		        'field' => '',
 		        'label' => '',
-		        'meta' => false,
-		        'format' => 'j M Y ('.$default_timezone.')'
-
+		        'meta' => false
 		    ), $atts, 'wp_ontraninja_cot_field' );
 
 
 			$account_id = "";
-			$data_value = "";
 
-		    if(isset($_GET['id'])) {
 
-				$account_id = $_GET['id'];
+		    //if(isset($_GET['id'])) {
+
+				$account_id = 37;
 
 				
 				$requestParams = array(
@@ -90,122 +86,123 @@ class Wp_Ontraninja_Shortcodes {
 					$label = '<strong>'.$atts['label'].'</strong>: ';
 				}
 
-				if($atts['field']) {
+				//return $label.$response_decode->data->{$atts['field']};
 
-					$data_value .= $label.$response_decode->data->{$atts['field']};
+			//}
+
+			$object_vars = get_object_vars($response_decode->data);
+
+			$ak_object_vars  = array_keys($object_vars);
+
+			$requestParamsMeta = array(
+				   "objectID" => $atts['object_id'],
+				    "format"   => "byId"
+			);
+
+
+			//if($atts['meta'] == true) {
+
+				$response_meta = $this->client->object()->retrieveMeta($requestParamsMeta);
+
+				$response_meta_decode = json_decode($response_meta);
+
+
+				$meta_fields = $response_meta_decode->data->{$atts['object_id']};
+
+				if(isset($meta_fields->fields)) {
+
+					$get_meta_fields = $meta_fields->fields;
 
 				}
 
-			
 
-				/** Meta Object **/
+				$gov_get_meta_fields = get_object_vars($get_meta_fields);
 
-				$object_vars = get_object_vars($response_decode->data);
-
-				$ak_object_vars  = array_keys($object_vars);
-
-				$requestParamsMeta = array(
-					   "objectID" => $atts['object_id'],
-					    "format"   => "byId"
-				);
+				$ak_gov_get_meta_fields = array_keys($gov_get_meta_fields);
 
 
-				if($atts['meta'] == true) {
+				$i = 0;
 
-					$response_meta = $this->client->object()->retrieveMeta($requestParamsMeta);
+				$data_value = "";
+					
 
-					$response_meta_decode = json_decode($response_meta);
+				foreach($ak_object_vars as $ak_object_var) {
+
+					//echo '<pre>'.print_r($ak_object_var, true).'</pre>';
 
 
-					$meta_fields = $response_meta_decode->data->{$atts['object_id']};
 
-					if(isset($meta_fields->fields)) {
+					
+					if(isset($get_meta_fields->$ak_object_var)) {
 
-						$get_meta_fields = $meta_fields->fields;
+						$gmf_abv = $get_meta_fields->$ak_object_var;
+
+
+					}
+
+	
+
+					if(isset($gmf_abv->alias)) {
+
+						$ga_alias = $gmf_abv->alias;
+
+					}
+
+					if(isset($ak_gov_get_meta_fields[$i])) {
+				
+						$count_ak_gov_get_meta_fields = $ak_gov_get_meta_fields[$i];
 
 					}
 
 
-					$gov_get_meta_fields = get_object_vars($get_meta_fields);
+					if(isset($get_meta_fields->$count_ak_gov_get_meta_fields->alias)) {
 
-					$ak_gov_get_meta_fields = array_keys($gov_get_meta_fields);
+						$data_value .= '<p><strong>'.$get_meta_fields->$count_ak_gov_get_meta_fields->alias.' - <i>'.$count_ak_gov_get_meta_fields.'</i></strong></p>';
 
-					$result = array_intersect($ak_object_vars,$ak_gov_get_meta_fields);
+					}
+					
+							
+					if(isset($object_vars[$count_ak_gov_get_meta_fields])) {
 
-				
-
-					foreach($result as $res) {
-								
-						$data_value .= '<h4><strong>'.$gov_get_meta_fields[$res]->alias.'</strong> - <i>'.$res.'</i></h4>';
+						$object_vars_value = $object_vars[$count_ak_gov_get_meta_fields];	
 						
+				
+					
 
-						$object_value = $object_vars[$res];
+						if(isset($get_meta_fields->$count_ak_gov_get_meta_fields->options)) {
 
-						if(isset($gov_get_meta_fields[$res]->options)) {
+							//$data_value = $get_meta_fields->$count_ak_gov_get_meta_fields->options->$object_vars_value;
 
-							$data_value .= '<p><strong class="text-danger">Option Data:</strong> <i>'.$gov_get_meta_fields[$res]->options->$object_value.'</i></p>';
+							$data_value .= '<p>'.$get_meta_fields->$count_ak_gov_get_meta_fields->options->$object_vars_value.'</p>';
+
+								//echo '<p>'.$data_value.'</p>';
 
 						} else {
-
-							
-
-
-							if ((string) (int) $object_value === $object_value && ($object_value <= PHP_INT_MAX)
-&& ($object_value >= ~PHP_INT_MAX) && strlen($object_value) >= 10) {
-
-		
-								$unix_timestamp = $object_value;
-
-
-
-								$datetime = new DateTime("@$unix_timestamp");
-							
-								$format_explode = explode("(",$atts['format']);
-
-								$time_zone_to = $format_explode[1];
-								$format_time = $format_explode[0];
-
-
-								$datetime = new DateTime("@$unix_timestamp");
-
-								$date_time_format = date_format($datetime, $format_time);
-
-					
-								$time_zone_from = "UTC";
-
-								try {
-
-									$display_date = new DateTime($date_time_format, new DateTimeZone($time_zone_from));
-
-									$display_date->setTimezone(new DateTimeZone($time_zone_to));
-
-									$data_value .= '<p><strong class="text-success">Date Data:</strong> '.$display_date->format($format_time).'</p>';
-
-								 } catch (Exception $e) {
-
-									$data_value .= '<p><strong class="text-success">Date Data: </strong>Error Date and Timezone Format!</p>';
-
-								}
-
-									
-							
 								
-							} else {
-								
-								$data_value .= '<p><strong class="text-info">Data:</strong> <i>'.$object_value.'</i></p>';
-							}
+							//$data_value = $object_vars_value;
 
+								//echo '<p>'.$data_value.'</p>';
+							$data_value .= '<p>'.$object_vars_value.'</p>';
 
 
 						}
 
+						
+
 					}
-				
+
+					//return '<p>'.$info_name_code.'<p>
+							//<p>'.$data_value.'</p>';
+						//echo '<pre>'.print_r($data_value, true).'</pre>';
+
+					$i++;
+
 				}
 
+				
 				return $data_value;
 
-			}
+			//}
 
 	}
 
