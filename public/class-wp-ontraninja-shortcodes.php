@@ -153,14 +153,10 @@ class Wp_Ontraninja_Shortcodes {
 						} else {
 
 							
-
-
 							if ((string) (int) $object_value === $object_value && ($object_value <= PHP_INT_MAX)
-&& ($object_value >= ~PHP_INT_MAX) && strlen($object_value) >= 10) {
+								&& ($object_value >= ~PHP_INT_MAX) && strlen($object_value) >= 10) {
 
-		
 								$unix_timestamp = $object_value;
-
 
 
 								$datetime = new DateTime("@$unix_timestamp");
@@ -192,8 +188,7 @@ class Wp_Ontraninja_Shortcodes {
 
 								}
 
-									
-							
+
 								
 							} else {
 								
@@ -358,59 +353,75 @@ class Wp_Ontraninja_Shortcodes {
 	       
 	    ), $atts, 'wp_ontraninja_register_information' );
 
+		/*** Get URL ***/
+
+    	$account_id = "";
+
+    	if(isset($_GET['id'])) {
+
+    		$account_id = $_GET['id'];
+    	}
+
+    	if($account_id == "") {
+			return;
+		}
+
+		/*** Connect API ***/
+    	
+    	$requestParams = array(
+		    "objectID" => 10029, 
+		    "id"       => $account_id
+		    //"id"       => 37
+		);
+
+
+		$response = $this->client->object()->retrieveSingle($requestParams);
+
+		$response_decode = json_decode($response);
+		
+		$object_vars = get_object_vars($response_decode->data);
+
+
+		$response_field = $this->client->object()->retrieveFields(array(
+		    "objectID" => 10029,
+		    "section" => "Registration Information"
+		));
+
+		$response_field_decode = json_decode($response_field);
+
+		$get_fieldeditor = array();
+
+		if(isset($response_field_decode->data->fields)) {
+
+			$get_fieldeditor = $response_field_decode->data->fields;
+		
+		}
+
+
+    	$reg_value = "";
+		$gf_alias = "";
+		$gf_field = "";
+		$bgc = "";
 
 		ob_start();
 
-	    ?>
+		?>
 
-	    <div class="demo">
+		<!-- Register Information Tempate -->
+
+	    <div class="pricingTableWrapper">
+
 		    <div class="container">
+
+		    	<h1 class="display-1 mb-4 text-center jumbotron">Register Information</h1>
+
 		        <div class="row">
 
 		        	<?php
 
-		        	$requestParams = array(
-					    "objectID" => 10029, 
-					    "id"       => $atts['register_id']
-					    //"id"       => 37
-					);
-
-					$response = $this->client->object()->retrieveSingle($requestParams);
-
-					$response_decode = json_decode($response);
-
-					$object_vars = get_object_vars($response_decode->data);
-
-
-	        		$response_field = $this->client->object()->retrieveFields(array(
-					    "objectID" => 10029,
-					    "section" => "Registration Information"
-					));
-
-					$response_field_decode = json_decode($response_field);
-
-					$get_fieldeditor = array();
-
-					if(isset($response_field_decode->data->fields)) {
-
-						
-
-						$get_fieldeditor = $response_field_decode->data->fields;
-					
-					}
-
-
-
-		        	$reg_value = "";
-					$gf_alias = "";
-					$gf_field = "";
-					$bgc = "";
-
 		        	foreach($get_fieldeditor as $g_field => $pp) {
 
 		        		foreach($pp as $p) {
-
-
 
 				        	?>
 
@@ -523,7 +534,7 @@ class Wp_Ontraninja_Shortcodes {
 					                                $object_value =  $object_vars[$p->field]; 
 
 			                        if ((string) (int) $object_value === $object_value && ($object_value <= PHP_INT_MAX)
-        && ($object_value >= ~PHP_INT_MAX) && strlen($object_value) >= 10) {
+        								&& ($object_value >= ~PHP_INT_MAX) && strlen($object_value) >= 10) {
 
 
 									$unix_timestamp = $object_value;
@@ -536,6 +547,7 @@ class Wp_Ontraninja_Shortcodes {
 
 									$time_zone_to ='Australia/Sydney';
 									$format_time = 'j M Y';
+									$format_time_h = 'g:i A';
 
 
 
@@ -543,7 +555,7 @@ class Wp_Ontraninja_Shortcodes {
 									$datetime = new DateTime("@$unix_timestamp");
 
 									$date_time_format = date_format($datetime, $format_time);
-
+									$date_time_format_h = date_format($datetime, $format_time_h);
 
 
 									$time_zone_from = "UTC";
@@ -553,9 +565,13 @@ class Wp_Ontraninja_Shortcodes {
 
 										$display_date = new DateTime($date_time_format, new DateTimeZone($time_zone_from));
 
+										$display_date_h = new DateTime($date_time_format_h, new DateTimeZone($time_zone_from));
+
 										$display_date->setTimezone(new DateTimeZone($time_zone_to));
 
-										$output_object_value = $display_date->format($format_time);
+										$display_date_h->setTimezone(new DateTimeZone($time_zone_to));
+
+										$output_object_value = $display_date->format($format_time).' at '.$display_date_h->format($format_time_h);
 
 									 } catch (Exception $e) {
 
@@ -603,6 +619,8 @@ class Wp_Ontraninja_Shortcodes {
 		    </div>
 
 		</div>
+
+		<!-- End Register Information Tempate -->
 
 	    <?php
 
