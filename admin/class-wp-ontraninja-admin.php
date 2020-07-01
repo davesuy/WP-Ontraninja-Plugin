@@ -220,4 +220,49 @@ class Wp_Ontraninja_Admin {
 
 	}
 
+	public function won_plugin_preloader_css() {
+
+		//global $post;
+
+		//if(has_shortcode( $post->post_content, 'wp_ontraninja_dynamic_cot_field')) {
+
+			?>
+
+			<!-- <div id="won-preloader"></div> -->
+
+			<style type="text/css">
+
+				#won-preloader{
+
+					position: fixed;
+					top: 0;
+				 	left: 0;
+				 	right: 0;
+				 	bottom: 0;
+					background:url(<?php echo WP_ONTRANINJA_PLUGIN_URL; ?>assets/images/preloader.GIF) no-repeat #FFFFFF 50%;
+					-moz-background-size:64px 64px;
+					-o-background-size:64px 64px;
+					-webkit-background-size:64px 64px;
+					background-size:64px 64px;
+					z-index: 99998;
+					width:100%;
+					height:100%;
+
+				}
+
+			</style>
+
+			<noscript>
+	    		<style type="text/css">
+	        		#won-preloader {
+	        			display:none !important;
+	        		}
+	    		</style>
+			</noscript>
+
+			<?php
+
+		//}
+	}
+
 }

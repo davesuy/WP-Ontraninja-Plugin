@@ -42,6 +42,83 @@ class Wp_Ontraninja_Shortcodes {
 
 	}
 
+	public function won_start_session() {
+
+		if(!session_id()) {
+
+			session_start();
+		
+		}
+
+		$account_id = "";
+
+	    if(isset($_GET['id'])) {
+
+			$account_id = $_GET['id'];
+		}
+
+
+		if (isset($_SESSION['dynamic_cot_'.$account_id])) {
+
+
+			if(!isset($_SESSION['CREATED_DC_'.$account_id])) {
+
+				 $_SESSION['CREATED_DC_'.$account_id] = time();
+
+			} 
+		} 
+
+
+		if (isset($_SESSION['dynamic_cot_name_'.$account_id])) {
+
+		    if(!isset($_SESSION['CREATED_DCN_'.$account_id])) {
+
+				 $_SESSION['CREATED_DCN_'.$account_id] = time();
+
+			} 
+
+		} 
+
+
+		$time = $_SERVER['REQUEST_TIME'];
+
+		/**
+		* for a 30 minute timeout, specified in seconds
+		*/
+		$timeout_duration = 21600; // 6 hours 1800 = 30 minutes
+
+		/**
+		* Here we look for the user's LAST_ACTIVITY timestamp. If
+		* it's set and indicates our $timeout_duration has passed,
+		* blow away any previous $_SESSION data and start a new one.
+		*/
+		if (isset($_SESSION['dynamic_cot_'.$account_id]) && 
+		   ($time - $_SESSION['CREATED_DC_'.$account_id]) > $timeout_duration) {
+		    
+			unset($_SESSION["dynamic_cot_".$account_id]);
+			unset($_SESSION["CREATED_DC_".$account_id]);
+
+		}
+
+		if (isset($_SESSION['dynamic_cot_name_'.$account_id]) && 
+		   ($time - $_SESSION['CREATED_DCN_'.$account_id]) > $timeout_duration) {
+		    
+		
+			unset($_SESSION["dynamic_cot_name_".$account_id]);
+			unset($_SESSION["CREATED_DCN_".$account_id]);
+			
+		}
+
+
+	
+		
+		//echo  '<pre>'.print_r($_SESSION, true).'</pre>';
+		//echo  '<pre>'.print_r($time, true).'</pre>';
+		
+		//echo  '<pre>'.print_r($timeout_duration, true).'</pre>';
+
+	}
+
 	
 	public function public_shortcodes() {
 
@@ -52,6 +129,434 @@ class Wp_Ontraninja_Shortcodes {
 
 
 		add_shortcode( 'wp_ontraninja_register_information', array($this,'wp_ontraninja_register_information_func') );
+
+
+
+		add_shortcode( 'wp_ontraninja_dynamic_cot_field', array($this,'wp_ontraninja_dynamic_cot_field_func') );
+
+	}
+
+
+	public function wp_ontraninja_dynamic_cot_field_func($atts) {
+
+
+		global $wp_session;
+
+
+		$default_timezone = wp_timezone_string();
+
+		$atts = shortcode_atts( array(
+	        'object_id' => '',
+	        'field' => '',
+	        'label' => '',
+	        'color' => '',
+	        'format' => 'j M Y ('.$default_timezone.')'
+
+	    ), $atts, 'wp_ontraninja_dynamic_cot_field' );
+
+		$account_id = "";
+
+	    if(isset($_GET['id'])) {
+
+			$account_id = $_GET['id'];
+		}
+
+		if($account_id == "") {
+			return;
+		}
+
+		if($atts['object_id'] == "") {
+			return;
+		}
+
+
+	
+
+
+		$field_attr = $atts['field'];
+		$color = $atts['color'];
+
+
+		$objectID = $atts['object_id'];
+		$section = "Registration Information";
+
+
+
+		ob_start();
+
+	
+
+		$field_name = "";
+
+		if($field_attr == 'firstname' || $field_attr == 'lastname') {
+
+			if(isset($_SESSION['dynamic_cot_name_'.$account_id])) {
+
+
+				
+				//echo '"set" ';
+
+				$field_name = $_SESSION['dynamic_cot_name_'.$account_id]['firstname'];
+
+
+			} else { 
+			
+				/** Connect API Regsistration **/
+
+				$connect_api_instance = new Wp_Ontraninja_Connect_Ontraport;
+
+					
+				$connect_api_instance->connect_api_shortcode($objectID, $account_id);
+
+				
+				
+				/** End Connect API Regsistration **/
+					
+				//echo '<pre>'.print_r($response_decode_array, true).'</pre>';
+				
+
+				if(is_array($connect_api_instance->ak_response_contact_decode_data)) {
+
+					if(in_array($field_attr, $connect_api_instance->ak_response_contact_decode_data)) {
+
+
+						//echo '"not set" ';
+
+				
+						$set_session_val = $connect_api_instance->response_contact_decode->data->$field_attr;
+
+						$_SESSION['dynamic_cot_name_'.$account_id]['firstname'] = $set_session_val;
+
+						$field_name = $_SESSION['dynamic_cot_name_'.$account_id]['firstname'];
+							
+							
+
+					}
+
+				}
+
+			}
+
+		
+			echo  $field_name;
+
+		} else {
+
+
+		// Other Data
+
+
+	
+
+			$field_name_output = "";
+
+
+			if(isset($_SESSION['dynamic_cot_'.$account_id][$field_attr])) {
+
+				//echo 'info set - ';
+
+				$field_name_output = $_SESSION['dynamic_cot_'.$account_id][$field_attr];
+
+			} else { 
+
+
+				/** Connect API Regsistration **/
+
+				$connect_api_instance = new Wp_Ontraninja_Connect_Ontraport;
+
+					
+				$connect_api_instance->connect_api_shortcode($objectID, $account_id);
+
+
+				/** End Connect API Regsistration **/
+		
+				if(is_array($connect_api_instance->ak_response_contact_decode_data)) {
+					
+					if(!in_array($field_attr, $connect_api_instance->ak_response_contact_decode_data )) {
+
+				
+						// Register Information
+				
+
+						$object_vars = get_object_vars($connect_api_instance->response_decode->data);
+
+
+						$requestParams_reg = array(
+						    "objectID" => $objectID,
+						    "section"       => $section
+						);
+
+						$response_field = $this->client->object()->retrieveFields($requestParams_reg);
+
+						$response_field_decode = json_decode($response_field);
+
+
+						$get_fieldeditor = array();
+
+						if(isset($response_field_decode->data->fields)) {
+
+							$get_fieldeditor = $response_field_decode->data->fields;
+						
+						}
+
+
+						$reg_value = "";
+						$gf_alias = "";
+						$gf_field = "";
+						$bgc = "";
+
+						foreach($get_fieldeditor as $g_field => $pp) {
+
+
+					        foreach($pp as $p) {
+
+					        	//echo $p->alias.'xx<br/>';
+					        
+
+						        if($p->alias == $field_attr) {
+						        		
+					                //echo $p->alias; 
+					                // echo $p->field; 
+
+						        	$options_decode = json_decode($p->options);
+
+						        	if(is_array($options_decode)) {
+
+
+						        		if(!empty($options_decode)) {
+
+						        			foreach($options_decode as $options_decod) {
+
+							                    			//echo '<pre>'.print_r( $options_decode, true).'</pre>';
+
+							                    if(isset($options_decod->value)) {
+
+
+							                    	if($options_decod->value == $object_vars[$p->field]) {
+
+							                    				
+							                    		if(!empty($color)) {
+
+								                    		if($color == 'text') {
+
+								                    			//echo $options_decod->color.'3';
+
+
+								                    			// Info Color
+
+									                    		$field_name_output_c = "";
+
+																if(isset($_SESSION['dynamic_cot_'.$account_id][$field_attr])) {
+
+																	//echo 'info set - color ';
+
+																	$field_name_output_c = $_SESSION['dynamic_cot_'.$account_id][$field_attr];
+
+											                     
+
+								                    			} else {
+
+								                    				//echo 'info not set - color ';
+
+								                    				$set_session_val_output_c = $options_decod->color;
+
+																	$_SESSION['dynamic_cot_'.$account_id][$field_attr] = $set_session_val_output_c;
+
+																	$field_name_output_c = $_SESSION['dynamic_cot_'.$account_id][$field_attr];
+
+									                    			
+
+
+								                    			}
+
+								                    			echo $field_name_output_c;
+
+								                    		} elseif($color == 'background') {
+
+								                    			//echo $options_decod->backgroundColor.'2';
+
+
+
+								                    			// Info background Colr
+
+									                    		$field_name_output_bc = "";
+
+																if(isset($_SESSION['dynamic_cot_'.$account_id][$field_attr])) {
+
+																	//echo 'info set - bc ';
+
+																	$field_name_output_bc = $_SESSION['dynamic_cot_'.$account_id][$field_attr];
+
+											                     
+
+								                    			} else {
+
+								                    				//echo 'info not set - bc ';
+
+								                    				$set_session_val_output_bc = $options_decod->backgroundColor;
+
+																	$_SESSION['dynamic_cot_'.$account_id][$field_attr] = $set_session_val_output_bc;
+
+																	$field_name_output_bc = $_SESSION['dynamic_cot_'.$account_id][$field_attr];
+
+									                    			
+
+
+								                    			}
+
+								                    			echo $field_name_output_bc;
+
+								                    		}
+
+								                    	} else {
+
+								                    		// Info Label
+
+								                    		$field_name_output_label = "";
+
+															if(isset($_SESSION['dynamic_cot_'.$account_id][$field_attr])) {
+
+																//echo 'info set - Label ';
+
+																$field_name_output_label = $_SESSION['dynamic_cot_'.$account_id][$field_attr];
+
+										                     
+
+							                    			} else {
+
+							                    				//echo 'info not set - Label ';
+
+							                    				$set_session_val_output_label = $options_decod->label;
+
+																$_SESSION['dynamic_cot_'.$account_id][$field_attr] = $set_session_val_output_label;
+
+																$field_name_output_label = $_SESSION['dynamic_cot_'.$account_id][$field_attr];
+
+								                    			//echo $options_decod->label.'1';
+
+
+							                    			}
+
+							                    			echo $field_name_output_label;
+
+							                    		}
+
+
+							                    	}
+
+							                    }
+
+
+								            }
+
+						        		}
+
+						       	 		//echo 'runx';
+						        				
+
+						        	} else {
+						        		 		//echo 'runy';
+			     						?>
+			        					<?php 
+
+						                $object_value =  $object_vars[$p->field]; 
+
+				                        if ((string) (int) $object_value === $object_value && ($object_value <= PHP_INT_MAX)
+											&& ($object_value >= ~PHP_INT_MAX) && strlen($object_value) >= 10) {
+
+
+											$unix_timestamp = $object_value;
+
+
+										 	//$output_object_value = $object_value;
+
+											$datetime = new DateTime("@$unix_timestamp");
+
+											$format_explode = explode("(",$atts['format']);
+										
+
+											// $time_zone_to ='Australia/Sydney';
+											// $format_time = 'j M Y';
+											// $format_time_h = 'g:i A';
+
+
+											$time_zone_to = $format_explode[1];
+											$format_time = $format_explode[0];
+
+
+
+
+											$datetime = new DateTime("@$unix_timestamp");
+
+											$date_time_format = date_format($datetime, $format_time);
+											//$date_time_format_h = date_format($datetime, $format_time_h);
+
+
+											$time_zone_from = "UTC";
+
+
+											try {
+
+												$display_date = new DateTime($date_time_format, new DateTimeZone($time_zone_from));
+
+												//$display_date_h = new DateTime($date_time_format_h, new DateTimeZone($time_zone_from));
+
+												$display_date->setTimezone(new DateTimeZone($time_zone_to));
+
+												//$display_date_h->setTimezone(new DateTimeZone($time_zone_to));
+
+												//$output_object_value = $display_date->format($format_time).' at '.$display_date_h->format($format_time_h);
+
+												$output_object_value = $display_date->format($format_time);
+
+											 } catch (Exception $e) {
+
+												$output_object_value = '<p><strong class="text-success">Date Data: </strong>Error Date and Timezone Format!</p>';
+
+											}
+
+
+
+				                        } else {
+
+				                        	  $output_object_value = $object_vars[$p->field];
+				                        }
+
+				                       // echo 'info not set - ';
+
+				                      	//echo $output_object_value;
+				                    
+				                      	$set_session_val_output = $output_object_value;
+
+										$_SESSION['dynamic_cot_'.$account_id][$field_attr]  = $set_session_val_output;
+
+										$field_name_output = $_SESSION['dynamic_cot_'.$account_id][$field_attr];
+
+						        	}
+
+						        }
+
+					        }
+
+					    }
+
+									
+					}
+
+				}
+
+
+			}
+
+
+			echo $field_name_output;
+
+		} // End else first name
+
+		$output = ob_get_clean();
+
+	    return $output;		
+
 
 	}
 
@@ -86,7 +591,7 @@ class Wp_Ontraninja_Shortcodes {
 
 				$response_decode = json_decode($response);
 
-				//return '<pre>'.print_r($response, true).'</pre>';
+				//return '<pre>'.print_r($response_decode , true).'</pre>';
 
 			
 				$label = "";
@@ -234,6 +739,8 @@ class Wp_Ontraninja_Shortcodes {
 
 			$response_decode = json_decode($response);
 
+			//return '<pre>'.print_r( $response_decode, true).'</pre>';
+
 
 	    	$contact_id = $response_decode->data->{"f2915"};
 
@@ -348,8 +855,11 @@ class Wp_Ontraninja_Shortcodes {
 
 	public function wp_ontraninja_register_information_func($atts) {
 
+		$default_timezone = wp_timezone_string();
+
 		$atts = shortcode_atts( array(
-	        'register_id' => ''
+	        'register_id' => '',
+	        'format' => 'j M Y ('.$default_timezone.')'
 	       
 	    ), $atts, 'wp_ontraninja_register_information' );
 
@@ -527,57 +1037,66 @@ class Wp_Ontraninja_Shortcodes {
 
 				                    	} else {
 				                    ?>
+
 				                    	<div class="pricing-content">
 					                        <div class="price-value">
 					                            <span class="amount" style="font-size:16px">Value - <?php 
 
-					                                $object_value =  $object_vars[$p->field]; 
+					                $object_value =  $object_vars[$p->field]; 
 
 			                        if ((string) (int) $object_value === $object_value && ($object_value <= PHP_INT_MAX)
         								&& ($object_value >= ~PHP_INT_MAX) && strlen($object_value) >= 10) {
 
 
-									$unix_timestamp = $object_value;
+										$unix_timestamp = $object_value;
 
 
-								 	//$output_object_value = $object_value;
+									 	//$output_object_value = $object_value;
 
-									$datetime = new DateTime("@$unix_timestamp");
-								
+										$datetime = new DateTime("@$unix_timestamp");
 
-									$time_zone_to ='Australia/Sydney';
-									$format_time = 'j M Y';
-									$format_time_h = 'g:i A';
+										$format_explode = explode("(",$atts['format']);
+									
 
-
-
-
-									$datetime = new DateTime("@$unix_timestamp");
-
-									$date_time_format = date_format($datetime, $format_time);
-									$date_time_format_h = date_format($datetime, $format_time_h);
+										// $time_zone_to ='Australia/Sydney';
+										// $format_time = 'j M Y';
+										// $format_time_h = 'g:i A';
 
 
-									$time_zone_from = "UTC";
+										$time_zone_to = $format_explode[1];
+										$format_time = $format_explode[0];
 
 
-									try {
 
-										$display_date = new DateTime($date_time_format, new DateTimeZone($time_zone_from));
 
-										$display_date_h = new DateTime($date_time_format_h, new DateTimeZone($time_zone_from));
+										$datetime = new DateTime("@$unix_timestamp");
 
-										$display_date->setTimezone(new DateTimeZone($time_zone_to));
+										$date_time_format = date_format($datetime, $format_time);
+										//$date_time_format_h = date_format($datetime, $format_time_h);
 
-										$display_date_h->setTimezone(new DateTimeZone($time_zone_to));
 
-										$output_object_value = $display_date->format($format_time).' at '.$display_date_h->format($format_time_h);
+										$time_zone_from = "UTC";
 
-									 } catch (Exception $e) {
 
-										$output_object_value = '<p><strong class="text-success">Date Data: </strong>Error Date and Timezone Format!</p>';
+										try {
 
-									}
+											$display_date = new DateTime($date_time_format, new DateTimeZone($time_zone_from));
+
+											//$display_date_h = new DateTime($date_time_format_h, new DateTimeZone($time_zone_from));
+
+											$display_date->setTimezone(new DateTimeZone($time_zone_to));
+
+											//$display_date_h->setTimezone(new DateTimeZone($time_zone_to));
+
+											//$output_object_value = $display_date->format($format_time).' at '.$display_date_h->format($format_time_h);
+
+											$output_object_value = $display_date->format($format_time);
+
+										 } catch (Exception $e) {
+
+											$output_object_value = '<p><strong class="text-success">Date Data: </strong>Error Date and Timezone Format!</p>';
+
+										}
 
 
 
@@ -587,8 +1106,6 @@ class Wp_Ontraninja_Shortcodes {
 			                        }
 
 			                      	echo $output_object_value;
-
-			                           
 
 
 

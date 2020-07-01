@@ -30,3 +30,15 @@
 	 */
 
 })( jQuery );
+
+
+// jQuery(window).load(function() { 
+
+// 	jQuery('#won-preloader').delay(250).fadeOut("slow");
+	
+// 	setTimeout(won_remove_preloader, 2000);
+// 	function won_remove_preloader() {	
+// 		jQuery('#won-preloader').remove();
+// 	}
+	
+// });

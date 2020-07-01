@@ -134,6 +134,12 @@ class Wp_Ontraninja {
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-wp-ontraninja-public.php';
 
+
+
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-connect-ontraport.php';
+
+	
+
 		$this->loader = new Wp_Ontraninja_Loader();
 
 	
@@ -173,6 +179,9 @@ class Wp_Ontraninja {
 		// Action hook for admin menu
 		$this->loader->add_action( 'admin_menu', $plugin_admin, 'ontraninja_menu' );
 
+		// Preloader GIF
+		//$this->loader->add_action('wp_head',  $plugin_admin, 'won_plugin_preloader_css');
+	
 	}
 
 	/**
@@ -188,13 +197,16 @@ class Wp_Ontraninja {
 
 
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
-		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
+		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts', 20 );
 
 		// Shortcode Init
 		
 		$plugin_shortcode =  new Wp_Ontraninja_Shortcodes( $this->get_plugin_name(), $this->get_version(), $this->get_client());
 
-		$this->loader->add_action( 'init', $plugin_shortcode, 'public_shortcodes' );
+		$this->loader->add_action( 'init', $plugin_shortcode, 'public_shortcodes', 10 );
+
+
+		$this->loader->add_action( 'init', $plugin_shortcode, 'won_start_session', 20 );
 
 	}
 
