@@ -158,6 +158,8 @@ jQuery( document ).ready(function() {
 		     	// console.log(op_id_res + "-id-here");
 
 
+
+
 		     		jQuery('.gif-loader-'+ op_val_res).css('display', 'none');
 
 		     	

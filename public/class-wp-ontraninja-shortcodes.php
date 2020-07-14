@@ -345,7 +345,7 @@ class Wp_Ontraninja_Shortcodes {
 	 				                    	if($options_decod->value == $object_vars[$p->field]) {
 
 					                    				
-	 				                    		if(!empty($color) && $field_attr_other != "Type") {
+	 				                    		if(!empty($color) && $field_attr_other != "Type" && $field_attr_other != "Event Selection") {
 
 	 					                    		if($color == 'text') {
 
