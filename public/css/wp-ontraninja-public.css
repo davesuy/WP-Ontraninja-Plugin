@@ -2,3 +2,19 @@
  * All of the CSS for your public-facing functionality should be
  * included in this file.
  */
+
+.gif-loader,
+.gif-loader-Type,
+.gif-loader-Price,
+.gif-loader-Event_Selection,
+.gif-loader-first,
+.gif-loader-Event_Start_Time{
+ 	background: url(../../assets/images/glow.gif) no-repeat scroll 0 0 transparent;
+    display: inline-block;
+    width: 35px;
+    height: 35px;
+    background-size: 100%;
+    background-position: center 3px;
+    position: relative;
+    top: 7px;
+ }

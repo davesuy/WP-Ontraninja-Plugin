@@ -208,6 +208,19 @@ class Wp_Ontraninja {
 
 		$this->loader->add_action( 'init', $plugin_shortcode, 'won_start_session', 20 );
 
+
+		// Ajax Request Shortcode
+
+		$this->loader->add_action( 'wp_ajax_request_data' , $plugin_shortcode, 'won_ajax_request_data' );
+		$this->loader->add_action( 'wp_ajax_nopriv_request_data' , $plugin_shortcode, 'won_ajax_request_data' );
+
+
+		$this->loader->add_action( 'wp_ajax_request_data_other' , $plugin_shortcode, 'won_ajax_request_data_other' );
+		$this->loader->add_action( 'wp_ajax_nopriv_request_data_other' , $plugin_shortcode, 'won_ajax_request_data_other' );
+
+
+
+
 	}
 
 

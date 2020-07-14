@@ -130,11 +130,463 @@ class Wp_Ontraninja_Shortcodes {
 
 		add_shortcode( 'wp_ontraninja_register_information', array($this,'wp_ontraninja_register_information_func') );
 
-
+		// Shortcode Used
 
 		add_shortcode( 'wp_ontraninja_dynamic_cot_field', array($this,'wp_ontraninja_dynamic_cot_field_func') );
+	
+	}
+
+
+	public function won_ajax_request_data()  {
+
+			$objectID = "";
+
+			if($_POST['objectID']) {
+
+				$objectID = $_POST['objectID'];
+
+			}
+
+
+			$account_id = "";
+
+			if($_POST['account_id']) {
+
+				$account_id = $_POST['account_id'];
+
+			}
+
+
+			$field_attr = "";
+
+			if($_POST['field_attr']) {
+
+				$field_attr = $_POST['field_attr'];
+
+			}
+
+			/** Connect API Regsistration **/
+
+			$connect_api_instance = new Wp_Ontraninja_Connect_Ontraport;
+
+				
+			$connect_api_instance->connect_api_shortcode($objectID, $account_id);
+
+			
+			
+			/** End Connect API Regsistration **/
+				
+			//echo '<pre>'.print_r($response_decode_array, true).'</pre>';
+			
+
+			if(is_array($connect_api_instance->ak_response_contact_decode_data)) {
+
+				if(in_array($field_attr, $connect_api_instance->ak_response_contact_decode_data)) {
+
+
+					//echo '"not set" ';
+
+			
+					$set_session_val = $connect_api_instance->response_contact_decode->data->$field_attr;
+
+					$_SESSION['dynamic_cot_name_'.$account_id]['firstname'] = $set_session_val;
+
+					$field_name = $_SESSION['dynamic_cot_name_'.$account_id]['firstname'];
+						
+						
+
+				}
+
+			}
+
+			echo  $field_name;
+
+		// echo $objectID;
+		// echo $account_id;
+		//echo $field_attr;
+		die();
 
 	}
+
+
+	public function won_ajax_request_data_other()  {
+
+
+		$objectID = "";
+
+		if($_POST['objectID']) {
+
+			$objectID = $_POST['objectID'];
+
+		}
+
+
+		$account_id = "";
+
+		if($_POST['account_id']) {
+
+			$account_id = $_POST['account_id'];
+
+		}
+
+		$field_attr_other = "";
+
+		if($_POST['field_attr_other']) {
+
+			$field_attr_other = $_POST['field_attr_other'];
+
+		}
+
+
+		$format = "";
+
+		if($_POST['format']) {
+
+			$format = $_POST['format'];
+
+		}
+
+		// $label = "";
+
+		// if($_POST['label']) {
+
+		// 	$label = $_POST['label'];
+
+		// }
+
+		$color = "";
+
+		if($_POST['color']) {
+
+			$color = $_POST['color'];
+
+		}
+
+		//echo $field_attr_other;
+
+
+
+		$section = "Registration Information";
+		//$color = "background";
+
+		/** Connect API Regsistration **/
+
+	 	$connect_api_instance = new Wp_Ontraninja_Connect_Ontraport;
+
+			
+	 	$connect_api_instance->connect_api_shortcode($objectID, $account_id);
+
+
+	 	/** End Connect API Regsistration **/
+
+	 	if(is_array($connect_api_instance->ak_response_contact_decode_data)) {
+		
+	 		if(!in_array($field_attr_other, $connect_api_instance->ak_response_contact_decode_data )) {
+
+	
+	 			// Register Information
+		
+
+	 			$object_vars = get_object_vars($connect_api_instance->response_decode->data);
+
+
+	 			$requestParams_reg = array(
+	 			    "objectID" => $objectID,
+	 			    "section"       => $section
+	 			);
+
+	 			$response_field = $this->client->object()->retrieveFields($requestParams_reg);
+
+	 			$response_field_decode = json_decode($response_field);
+
+
+	 			$get_fieldeditor = array();
+
+	 			if(isset($response_field_decode->data->fields)) {
+
+	 				$get_fieldeditor = $response_field_decode->data->fields;
+				
+	 			}
+
+	 			//echo '<pre>'.print_r( $response_field_decode, true).'</pre>';
+
+	 			$reg_value = "";
+	 			$gf_alias = "";
+	 			$gf_field = "";
+	 			$bgc = "";
+
+	 			foreach($get_fieldeditor as $g_field => $pp) {
+
+
+	 		        foreach($pp as $p) {
+
+	 		        	//echo $p->alias.'xx<br/>';
+			        
+
+	 			        if($p->alias == $field_attr_other) {
+				        		
+	 		                //echo $p->alias; 
+	 		                // echo $p->field; 
+
+	 			        	$options_decode = json_decode($p->options);
+
+	 			        	if(is_array($options_decode)) {
+
+
+	 			        		if(!empty($options_decode)) {
+
+	 			        			foreach($options_decode as $options_decod) {
+
+	 				                   //echo '<pre>'.print_r( $options_decode, true).'</pre>';
+
+	 				                    if(isset($options_decod->value)) {
+
+
+	 				                    	if($options_decod->value == $object_vars[$p->field]) {
+
+					                    				
+	 				                    		if(!empty($color) && $field_attr_other != "Type") {
+
+	 					                    		if($color == 'text') {
+
+	 					                    			//echo $options_decod->color.'3';
+
+
+	 					                    			// Info Color
+
+	 						                    		$field_name_output_c = "";
+
+	 													if(isset($_SESSION['dynamic_cot_'.$account_id][$field_attr_other])) {
+
+	 														//echo 'info set - color ';
+
+	 														$field_name_output_c = $_SESSION['dynamic_cot_'.$account_id][$field_attr_other];
+
+										                    echo $field_name_output_c;
+
+	 					                    			} else {
+
+	 					                    				//echo 'info not set - color ';
+
+	 					                    				$set_session_val_output_c = $options_decod->color;
+
+	 														$_SESSION['dynamic_cot_'.$account_id][$field_attr_other] = $set_session_val_output_c;
+
+	 														$field_name_output_c = $_SESSION['dynamic_cot_'.$account_id][$field_attr_other];
+
+							                    			
+	 														echo  'cc_'.$options_decod->color;
+
+	 					                    			}
+
+	 					                    			
+
+	 					                    		} elseif($color == 'background') {
+
+	 					                    			//echo $options_decod->backgroundColor.'2';
+
+
+
+	 					                    			// Info background Colr
+
+	 						                    		$field_name_output_bc = "";
+
+	 													if(isset($_SESSION['dynamic_cot_'.$account_id][$field_attr_other])) {
+
+	 														//echo 'info set - bc ';
+
+	 														$field_name_output_bc = $_SESSION['dynamic_cot_'.$account_id][$field_attr_other];
+
+									                     	echo $field_name_output_bc;
+
+	 					                    			} else {
+
+	 					                    				//echo 'info not set - bc ';
+
+	 					                    				$set_session_val_output_bc = $options_decod->backgroundColor;
+
+	 														$_SESSION['dynamic_cot_'.$account_id][$field_attr_other] = $set_session_val_output_bc;
+
+	 														$field_name_output_bc = $_SESSION['dynamic_cot_'.$account_id][$field_attr_other];
+
+							                    			
+	 														echo 'bg_'.$options_decod->backgroundColor;
+
+	 					                    			}
+
+	 					                    			
+
+	 					                    		}
+
+	 					                    	} else {
+
+	 					                    		// Info Label
+
+	 					                    		$field_name_output_label = "";
+
+	 												if(isset($_SESSION['dynamic_cot_'.$account_id][$field_attr_other])) {
+
+	 													//echo 'info set - Label ';
+
+	 													$field_name_output_label = $_SESSION['dynamic_cot_'.$account_id][$field_attr_other];
+
+								                     	echo $field_name_output_label;
+
+	 				                    			} else {
+
+	 				                    				//echo 'info not set - Label ';
+
+	 				                    				$set_session_val_output_label = $options_decod->label;
+
+	 													$_SESSION['dynamic_cot_'.$account_id][$field_attr_other] = $set_session_val_output_label;
+
+	 													$field_name_output_label = $_SESSION['dynamic_cot_'.$account_id][$field_attr_other];
+
+	 					                    			echo $options_decod->label;
+
+
+	 				                    			}
+
+	 				                    			//echo '('.$param.'+paramRunX)';
+
+	 				                    			//echo $options_decod->label;
+	 				                    			//echo '/option-label';
+
+	 				                    			//echo '<--('.$field_name_output_label.')--una->';
+
+	 				                    		}
+
+
+	 				                    	}
+
+	 				                    }
+
+
+	 					            }
+
+	 			        		}
+
+	 			       	 		//echo '-runx';
+				        				
+
+	 			        	} else {
+	 			        		 //echo 'runy';
+	      						
+	      						// Ajax Date
+
+	 			                $object_value =  $object_vars[$p->field]; 
+
+
+
+
+		                        if ((string) (int) $object_value === $object_value && ($object_value <= PHP_INT_MAX)
+									&& ($object_value >= ~PHP_INT_MAX) && strlen($object_value) >= 10) {
+
+
+									$unix_timestamp = $object_value;
+
+
+	 							 	//$output_object_value = $object_value;
+
+									$datetime = new DateTime("@$unix_timestamp");
+
+									$default_timezone = wp_timezone_string();
+
+									$format_output = 'j M Y ('.$default_timezone.')';
+
+									if($format != "") {
+
+										$format_output = $format;
+
+									}
+
+
+									$format_explode = explode("(",$format_output);
+									
+									//echo '<pre>'.print_r($format, true).'</pre>';
+								// $time_zone_to ='Australia/Sydney';
+									// $format_time = 'j M Y';
+		 								// $format_time_h = 'g:i A';
+
+
+									$time_zone_to = $format_explode[1];
+									$format_time = $format_explode[0];
+
+
+
+
+	 								$datetime = new DateTime("@$unix_timestamp");
+
+	 								$date_time_format = date_format($datetime, $format_time);
+	 								//$date_time_format_h = date_format($datetime, $format_time_h);
+
+
+	 								$time_zone_from = "UTC";
+
+
+									try {
+
+		 								$display_date = new DateTime($date_time_format, new DateTimeZone($time_zone_from));
+
+											//$display_date_h = new DateTime($date_time_format_h, new DateTimeZone($time_zone_from));
+
+		 								$display_date->setTimezone(new DateTimeZone($time_zone_to));
+
+											//$display_date_h->setTimezone(new DateTimeZone($time_zone_to));
+								//$output_object_value = $display_date->format($format_time).' at '.$display_date_h->format($format_time_h);
+
+										$output_object_value = $display_date->format($format_time);
+
+									 } catch (Exception $e) {
+
+											$output_object_value = '<p><strong class="text-success">Date Data: </strong>Error Date and Timezone Format!</p>';
+
+									}
+
+
+
+		                        } else {
+
+	 	                        	  $output_object_value = $object_vars[$p->field];
+	 	                        }
+
+	 	                       // echo 'info not set - ';
+
+	 	                        //echo '('.$param.'+paramRunY)';
+
+	 	                      	//echo $output_object_value;
+		                    
+	 	                      	$set_session_val_output = $output_object_value;
+
+	 							$_SESSION['dynamic_cot_'.$account_id][$field_attr_other]  = $set_session_val_output;
+
+	 							$field_name_output = $_SESSION['dynamic_cot_'.$account_id][$field_attr_other];
+
+	 							echo $field_name_output;
+	 							//echo '/last';
+
+	 			        	}
+
+	 			        }
+
+	 		        }
+
+	 		    }
+
+							
+	 		}
+
+	 	}
+
+	 	
+		
+	
+
+	 	die();
+
+
+	}
+
 
 
 	public function wp_ontraninja_dynamic_cot_field_func($atts) {
@@ -150,7 +602,7 @@ class Wp_Ontraninja_Shortcodes {
 	        'field' => '',
 	        'label' => '',
 	        'color' => '',
-	        'format' => 'j M Y ('.$default_timezone.')'
+	        'format' => ''
 
 	    ), $atts, 'wp_ontraninja_dynamic_cot_field' );
 
@@ -174,6 +626,8 @@ class Wp_Ontraninja_Shortcodes {
 
 
 		$field_attr = $atts['field'];
+		$format = $atts['format'];
+		$label = $atts['label'];
 		$color = $atts['color'];
 
 
@@ -184,7 +638,7 @@ class Wp_Ontraninja_Shortcodes {
 
 		ob_start();
 
-	
+	//echo '--'.$field_attr.'--</br>';
 
 		$field_name = "";
 
@@ -192,48 +646,29 @@ class Wp_Ontraninja_Shortcodes {
 
 			if(isset($_SESSION['dynamic_cot_name_'.$account_id])) {
 
-
-				
 				//echo '"set" ';
 
 				$field_name = $_SESSION['dynamic_cot_name_'.$account_id]['firstname'];
 
 
 			} else { 
+
+
+				
+
+				echo '<span id="won-shortcode-request">';
+
+					echo '<input type="hidden" id="account_id" name="account_id" value="'.$account_id.'">';
+					echo '<input type="hidden" id="objectID" name="objectID" value="'.$objectID.'">';
+					echo '<input type="hidden" id="fieldAttr" name="fieldAttr" value="'.$field_attr.'">';
+
+					echo '<span class="gif-loader-first"></span><span class="val_data_request"></span>';
+
+				echo '</span>';
+
+
+
 			
-				/** Connect API Regsistration **/
-
-				$connect_api_instance = new Wp_Ontraninja_Connect_Ontraport;
-
-					
-				$connect_api_instance->connect_api_shortcode($objectID, $account_id);
-
-				
-				
-				/** End Connect API Regsistration **/
-					
-				//echo '<pre>'.print_r($response_decode_array, true).'</pre>';
-				
-
-				if(is_array($connect_api_instance->ak_response_contact_decode_data)) {
-
-					if(in_array($field_attr, $connect_api_instance->ak_response_contact_decode_data)) {
-
-
-						//echo '"not set" ';
-
-				
-						$set_session_val = $connect_api_instance->response_contact_decode->data->$field_attr;
-
-						$_SESSION['dynamic_cot_name_'.$account_id]['firstname'] = $set_session_val;
-
-						$field_name = $_SESSION['dynamic_cot_name_'.$account_id]['firstname'];
-							
-							
-
-					}
-
-				}
 
 			}
 
@@ -243,13 +678,10 @@ class Wp_Ontraninja_Shortcodes {
 		} else {
 
 
-		// Other Data
-
-
-	
+			// Other Data
 
 			$field_name_output = "";
-
+			//echo '<pre>'.print_r($_SESSION,true).'</pre>';
 
 			if(isset($_SESSION['dynamic_cot_'.$account_id][$field_attr])) {
 
@@ -257,304 +689,75 @@ class Wp_Ontraninja_Shortcodes {
 
 				$field_name_output = $_SESSION['dynamic_cot_'.$account_id][$field_attr];
 
-			} else { 
+				if($color == "") {
 
+					echo $field_name_output;
 
-				/** Connect API Regsistration **/
+				} else {
+					?>
 
-				$connect_api_instance = new Wp_Ontraninja_Connect_Ontraport;
-
-					
-				$connect_api_instance->connect_api_shortcode($objectID, $account_id);
-
-
-				/** End Connect API Regsistration **/
-		
-				if(is_array($connect_api_instance->ak_response_contact_decode_data)) {
-					
-					if(!in_array($field_attr, $connect_api_instance->ak_response_contact_decode_data )) {
-
-				
-						// Register Information
-				
-
-						$object_vars = get_object_vars($connect_api_instance->response_decode->data);
-
-
-						$requestParams_reg = array(
-						    "objectID" => $objectID,
-						    "section"       => $section
-						);
-
-						$response_field = $this->client->object()->retrieveFields($requestParams_reg);
-
-						$response_field_decode = json_decode($response_field);
-
-
-						$get_fieldeditor = array();
-
-						if(isset($response_field_decode->data->fields)) {
-
-							$get_fieldeditor = $response_field_decode->data->fields;
-						
+					<style>
+						.ontraninja-con-bg {
+							background: <?php echo $field_name_output;; ?>;
 						}
 
-
-						$reg_value = "";
-						$gf_alias = "";
-						$gf_field = "";
-						$bgc = "";
-
-						foreach($get_fieldeditor as $g_field => $pp) {
-
-
-					        foreach($pp as $p) {
-
-					        	//echo $p->alias.'xx<br/>';
-					        
-
-						        if($p->alias == $field_attr) {
-						        		
-					                //echo $p->alias; 
-					                // echo $p->field; 
-
-						        	$options_decode = json_decode($p->options);
-
-						        	if(is_array($options_decode)) {
-
-
-						        		if(!empty($options_decode)) {
-
-						        			foreach($options_decode as $options_decod) {
-
-							                    			//echo '<pre>'.print_r( $options_decode, true).'</pre>';
-
-							                    if(isset($options_decod->value)) {
-
-
-							                    	if($options_decod->value == $object_vars[$p->field]) {
-
-							                    				
-							                    		if(!empty($color)) {
-
-								                    		if($color == 'text') {
-
-								                    			//echo $options_decod->color.'3';
-
-
-								                    			// Info Color
-
-									                    		$field_name_output_c = "";
-
-																if(isset($_SESSION['dynamic_cot_'.$account_id][$field_attr])) {
-
-																	//echo 'info set - color ';
-
-																	$field_name_output_c = $_SESSION['dynamic_cot_'.$account_id][$field_attr];
-
-											                     
-
-								                    			} else {
-
-								                    				//echo 'info not set - color ';
-
-								                    				$set_session_val_output_c = $options_decod->color;
-
-																	$_SESSION['dynamic_cot_'.$account_id][$field_attr] = $set_session_val_output_c;
-
-																	$field_name_output_c = $_SESSION['dynamic_cot_'.$account_id][$field_attr];
-
-									                    			
-
-
-								                    			}
-
-								                    			echo $field_name_output_c;
-
-								                    		} elseif($color == 'background') {
-
-								                    			//echo $options_decod->backgroundColor.'2';
-
-
-
-								                    			// Info background Colr
-
-									                    		$field_name_output_bc = "";
-
-																if(isset($_SESSION['dynamic_cot_'.$account_id][$field_attr])) {
-
-																	//echo 'info set - bc ';
-
-																	$field_name_output_bc = $_SESSION['dynamic_cot_'.$account_id][$field_attr];
-
-											                     
-
-								                    			} else {
-
-								                    				//echo 'info not set - bc ';
-
-								                    				$set_session_val_output_bc = $options_decod->backgroundColor;
-
-																	$_SESSION['dynamic_cot_'.$account_id][$field_attr] = $set_session_val_output_bc;
-
-																	$field_name_output_bc = $_SESSION['dynamic_cot_'.$account_id][$field_attr];
-
-									                    			
-
-
-								                    			}
-
-								                    			echo $field_name_output_bc;
-
-								                    		}
-
-								                    	} else {
-
-								                    		// Info Label
-
-								                    		$field_name_output_label = "";
-
-															if(isset($_SESSION['dynamic_cot_'.$account_id][$field_attr])) {
-
-																//echo 'info set - Label ';
-
-																$field_name_output_label = $_SESSION['dynamic_cot_'.$account_id][$field_attr];
-
-										                     
-
-							                    			} else {
-
-							                    				//echo 'info not set - Label ';
-
-							                    				$set_session_val_output_label = $options_decod->label;
-
-																$_SESSION['dynamic_cot_'.$account_id][$field_attr] = $set_session_val_output_label;
-
-																$field_name_output_label = $_SESSION['dynamic_cot_'.$account_id][$field_attr];
-
-								                    			//echo $options_decod->label.'1';
-
-
-							                    			}
-
-							                    			echo $field_name_output_label;
-
-							                    		}
-
-
-							                    	}
-
-							                    }
-
-
-								            }
-
-						        		}
-
-						       	 		//echo 'runx';
-						        				
-
-						        	} else {
-						        		 		//echo 'runy';
-			     						?>
-			        					<?php 
-
-						                $object_value =  $object_vars[$p->field]; 
-
-				                        if ((string) (int) $object_value === $object_value && ($object_value <= PHP_INT_MAX)
-											&& ($object_value >= ~PHP_INT_MAX) && strlen($object_value) >= 10) {
-
-
-											$unix_timestamp = $object_value;
-
-
-										 	//$output_object_value = $object_value;
-
-											$datetime = new DateTime("@$unix_timestamp");
-
-											$format_explode = explode("(",$atts['format']);
-										
-
-											// $time_zone_to ='Australia/Sydney';
-											// $format_time = 'j M Y';
-											// $format_time_h = 'g:i A';
-
-
-											$time_zone_to = $format_explode[1];
-											$format_time = $format_explode[0];
-
-
-
-
-											$datetime = new DateTime("@$unix_timestamp");
-
-											$date_time_format = date_format($datetime, $format_time);
-											//$date_time_format_h = date_format($datetime, $format_time_h);
-
-
-											$time_zone_from = "UTC";
-
-
-											try {
-
-												$display_date = new DateTime($date_time_format, new DateTimeZone($time_zone_from));
-
-												//$display_date_h = new DateTime($date_time_format_h, new DateTimeZone($time_zone_from));
-
-												$display_date->setTimezone(new DateTimeZone($time_zone_to));
-
-												//$display_date_h->setTimezone(new DateTimeZone($time_zone_to));
-
-												//$output_object_value = $display_date->format($format_time).' at '.$display_date_h->format($format_time_h);
-
-												$output_object_value = $display_date->format($format_time);
-
-											 } catch (Exception $e) {
-
-												$output_object_value = '<p><strong class="text-success">Date Data: </strong>Error Date and Timezone Format!</p>';
-
-											}
-
-
-
-				                        } else {
-
-				                        	  $output_object_value = $object_vars[$p->field];
-				                        }
-
-				                       // echo 'info not set - ';
-
-				                      	//echo $output_object_value;
-				                    
-				                      	$set_session_val_output = $output_object_value;
-
-										$_SESSION['dynamic_cot_'.$account_id][$field_attr]  = $set_session_val_output;
-
-										$field_name_output = $_SESSION['dynamic_cot_'.$account_id][$field_attr];
-
-						        	}
-
-						        }
-
-					        }
-
-					    }
-
-									
-					}
+						.ontraninja-text-color {
+							color: <?php echo $field_name_output;; ?>;
+						}
+					</style>
+					<?php
 
 				}
 
+			} else { 
 
-			}
+
+				//echo 'info NOT set - ';
+
+				$field_attr_str = str_replace(" ","_", $field_attr);
+
+				$field_attr_str_low = strtolower($field_attr_str);
 
 
-			echo $field_name_output;
+
+
+				echo '<span id="won-shortcode-request-other">';
+					echo '<span class="won-shortcode-request-other_'.$field_attr_str.'">';
+						if($field_attr != "color") {
+							
+							// Append
+							echo '<span class="val_data_request_other_'.$field_attr_str.'"></span>';
+						
+						}
+					
+						echo '<input type="hidden" id="account_id_other" name="account_id" value="'.$account_id.'">';
+						echo '<input type="hidden" id="objectID_other" name="objectID" value="'.$objectID.'">';
+						echo '<input type="hidden" id="field_attr_str" name="fieldAttrStr" value="'.$field_attr_str.'">';
+
+						echo '<input type="hidden" class="input-data-val" id="fieldAttr_other" ajax_attr="'.$field_attr.'" name="fieldAttr" value="'.$field_attr.'">';
+
+						//echo '<input type="hidden" id="field_attr_'.$field_attr_str_low.'" name="fieldAttr'.$field_attr_str.'" value="'.$field_attr_str.'">';
+
+						echo '<input type="hidden" class="input-data-val input-data-val-format" id="format" name="format" value="'.$format.'">';
+						echo '<input type="hidden" class="input-data-val input-data-val-label" id="label" name="label" value="'.$label.'">';
+						echo '<input type="hidden" class="input-data-val input-data-val-color" id="color" name="color" value="'.$color.'">';
+
+						echo '<span class="gif-loader-'.$field_attr_str.'"></span>';
+
+					echo '</span>';
+				echo '</span>';
+
+			
+
+			} // Ende Else Other
+
+
+			 //echo $field_name_output;
 
 		} // End else first name
 
 		$output = ob_get_clean();
-
+	
 	    return $output;		
 
 
@@ -1076,7 +1279,6 @@ class Wp_Ontraninja_Shortcodes {
 
 
 										$time_zone_from = "UTC";
-
 
 										try {
 

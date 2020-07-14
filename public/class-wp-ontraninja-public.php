@@ -115,7 +115,26 @@ class Wp_Ontraninja_Public {
 
 		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/wp-ontraninja-public.js', array('jquery'), null, false);
 
+
+		wp_enqueue_script( 'ajax-script',  plugin_dir_url( __FILE__ )  . 'js/won-ajax-script.js', array('jquery'), null, true);
+
+    	wp_localize_script( 'ajax-script', 'won_ajax_object',
+            array( 
+
+            	'ajax_url' => admin_url( 'admin-ajax.php' ) 
+
+        	) 
+
+        );
+
+
 	}
+
+
+	// public function won_ajax_request_data() {
+
+	// 	die();
+	// }
 
 
 }
